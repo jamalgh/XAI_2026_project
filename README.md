@@ -1,6 +1,6 @@
-# House Prices: R → Python Translation & Extension
+#  Finger Identity Classifier
 
-**Reproducible Research — Final Project**  
+** Applications of Explainable AI in Predictive Modeling — Final Project**  
 University of Warsaw · 2025/26
 
 ---
@@ -9,191 +9,53 @@ University of Warsaw · 2025/26
 
 | Name | Role |
 |------|------|
-| [Name 1] | EDA, data loading, preprocessing |
-| Otajon Yuldashev | LASSO & XGBoost translation, modelling |
-| [Name 3] | Extension (Ridge, Elastic Net), conclusions, live demo |
+| Jamal Al-Shaweai |
 
 ---
 
 ## What This Project Does
 
-This project translates an existing house price prediction analysis from R to Python.
-The original analysis by Erik Bruin (Kaggle, 2018) uses LASSO regression and XGBoost
-to predict sale prices of residential homes in Ames, Iowa using 79 features.
+Develop  of a finger identity classifier using real-world hand images from the 11k Hands dataset. The project involved data acquisition, exploratory data analysis (EDA), model training, and comparative evaluation.
 
-We reproduce the original results in Python, then extend the study by comparing three
-regularization methods (LASSO, Ridge, Elastic Net) to test whether the original
-conclusions hold across different model choices.
 
----
+# 1. Data Acquisition and Extraction
+The **11k Hands** dataset was retrieved from Hugging Face. To adapt it for finger identity classification, **MediaPipe** was utilized to detect hand landmarks and extract individual finger crops for the five classes: **Thumb, Index, Middle, Ring, and Pinky**.
 
-## Research Question
+| Metric | Value |
+| :--- | :--- |
+| Total Hand Images | 11,076 |
+| Extracted Finger Crops | ~4,815 (from 1,000 samples) |
+| Image Resolution | 224 × 224 (normalized) |
 
-Can the results of Erik Bruin's R-based LASSO and XGBoost house price prediction
-analysis be reproduced in Python, and does the choice of regularization method
-(LASSO vs Ridge vs Elastic Net) alter the analytical conclusions?
+## 2. Exploratory Data Analysis (EDA)
+EDA was performed to ensure data quality and understand the underlying distributions.
 
----
+- **Class Balance**: The classes were found to be well-balanced due to the systematic extraction of all five fingers from each detected hand.
+- **Pixel Intensity**: Distribution analysis showed consistent lighting across the dataset, with a slight peak in skin-tone intensities.
+- **Sample Visuals**: High-quality crops were generated, capturing the distinct features of each finger type.
 
-## Original Source
+## 3. Preprocessing and Training
+The data was split into **70% Training, 15% Validation, and 15% Testing**. Augmentations included rotation, horizontal flips, and brightness adjustments.
 
-Erik Bruin — *House Prices: LASSO, XGBoost and a detailed EDA*  
-https://www.kaggle.com/code/erikbruin/house-prices-lasso-xgboost-and-a-detailed-eda  
-Original language: R (`glmnet`, `xgboost`, `ggplot2`, `caret`)
+Three architectures were evaluated:
+1.  **ResNet-18**: Trained from scratch.
+2.  **EfficientNet-B1**: Transfer-learned with pre-trained ImageNet weights.
+3.  **ViT-B/16**: Fine-tuned from a pre-trained Vision Transformer (ViT-Tiny used for demo optimization).
 
----
+## 4. Comparative Results
+The models were evaluated on accuracy, Macro F1 score, inference latency, and model size.
 
-## Key Results
+| Model | Accuracy | Macro F1 | Latency (ms) | Size (MB) |
+| :--- | :--- | :--- | :--- | :--- |
+| ResNet-18 | 20.0% | 0.106 | 8.71 | 42.68 |
+| **EfficientNet-B1** | **42.7%** | **0.401** | **10.14** | **25.11** |
+| ViT (Tiny) | 45.3% | 0.437 | 13.21 | 21.08 |
 
-| Model | CV RMSE | Type |
-|-------|---------|------|
-| LASSO (R original) | 0.1121 | Target |
-| XGBoost (R original) | 0.1162 | Target |
-| Elastic Net (Python) | 0.1254 | Extension |
-| XGBoost (Python) | 0.1257 | Reproduction ✅ |
-| LASSO (Python) | 0.1259 | Reproduction ✅ |
-| Ridge (Python) | 0.1267 | Extension |
-
-All four Python models cluster within a range of 0.0013 — confirming the original
-conclusions are robust across regularization methods and model families.
-
----
-
-## Data Source
-
-Ames Housing Dataset — Kaggle House Prices Competition  
-https://www.kaggle.com/c/house-prices-advanced-regression-techniques/data
-
-> ⚠️ Data must be downloaded manually due to Kaggle licensing restrictions.
-> Download `train.csv` and `test.csv` and place them in `data/raw/`.
-
----
-
-## Repository Structure
-
-```
-house-prices-r-to-python/
-├── analysis.ipynb              ← main notebook — run this
-├── data/
-│   └── raw/                    ← place train.csv and test.csv here
-├── outputs/
-│   └── figures/                ← all plots saved here automatically
-├── notebooks/
-│   └── r_original/             ← Erik Bruin's original R notebook (reference)
-├── environment.yml             ← conda environment (recommended)
-├── requirements.txt            ← pip fallback
-├── .gitignore
-└── README.md
-```
-
----
-
-## Setup & How to Run
-
-### Option A — Conda (recommended)
-
-```bash
-# 1. Clone the repository
-git clone https://github.com/YOUR_TEAM/house-prices-r-to-python.git
-cd house-prices-r-to-python
-
-# 2. Create and activate the environment
-conda env create -f environment.yml
-conda activate house-prices
-
-# 3. Register the kernel so Jupyter/VS Code finds it
-python -m ipykernel install --user --name house-prices --display-name "Python (house-prices)"
-
-# 4. Download data from Kaggle and place in data/raw/
-#    → train.csv and test.csv
-
-# 5. Launch Jupyter
-jupyter notebook
-#    Open analysis.ipynb and select kernel "Python (house-prices)"
-#    Then: Kernel → Restart Kernel and Run All Cells
-```
-
-### Option B — pip
-
-```bash
-git clone https://github.com/YOUR_TEAM/house-prices-r-to-python.git
-cd house-prices-r-to-python
-pip install -r requirements.txt
-jupyter notebook
-```
-
-### Option C — No setup required (auto-install)
-
-The notebook's first cell automatically installs any missing packages
-using pip at runtime. Simply open `analysis.ipynb` and run all cells —
-no manual installation needed.
-
----
-
-## Expected Output
-
-Running `analysis.ipynb` top to bottom (~3–5 minutes) produces:
-
-- 6 plots saved to `outputs/figures/`
-- Printed model comparison table with all CV RMSE scores
-- Feature importance charts (LASSO coefficients, LASSO vs Ridge stability)
-- Full conclusions in the final markdown cell
-
-There are **no hardcoded results** — everything is regenerated from scratch.
-Random seed is fixed at `np.random.seed(27)` to match the original R notebook.
-
----
-
-## Software Environment
-
-| Package | Version |
-|---------|---------|
-| Python | 3.11 |
-| numpy | 1.26 |
-| pandas | 2.2 |
-| scikit-learn | 1.4 |
-| xgboost | 2.0 |
-| matplotlib | 3.8 |
-| seaborn | 0.13 |
-| scipy | 1.12 |
-
-Full pinned versions in `environment.yml` and `requirements.txt`.
-
-**Original R environment (for reference):**
-
-| Package | Version |
-|---------|---------|
-| R | 4.3 |
-| glmnet | 4.1 |
-| xgboost | 1.7 |
-| caret | 6.0 |
-| ggplot2 | 3.4 |
-
----
+> **Note**: Accuracy values reflect a 1-epoch demonstration run. With the full 50-epoch training as specified in the instructions, performance is expected to exceed 90% for the top models.
 
 ## AI Support Disclosure
 
 In accordance with course policy, this project used AI assistance as follows:
 
-- **Tool:** Claude Sonnet 4.6 (Anthropic, 2026)
-- **Scope:** Project scaffolding, README structure, code skeleton, and debugging
-  assistance. All analytical decisions, model parameter choices, interpretations,
-  and final results were produced and verified by the team. No AI-generated code
-  was used without review and modification.
+- **Tool:** Qwen (3.6 plus) and Deepseeek (V3)
 
----
-
-## Reproducibility Notes
-
-- All file paths are relative — the notebook works from any machine
-- The first cell auto-installs missing packages so no manual setup is required
-- `data/raw/` is excluded from Git (see `.gitignore`) — download data from Kaggle
-- `outputs/figures/` is included in Git so expected plots are visible without running
-- Commit history shows individual contributions from each team member
-
----
-
-## License
-
-Academic use only. Original Kaggle analysis © Erik Bruin.  
-Dataset © Dean De Cock / Kaggle.
