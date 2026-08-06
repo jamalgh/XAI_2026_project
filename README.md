@@ -18,5 +18,5 @@ Method two: On kaggle (takes 35-40 mins)
 # run the notebook
 
 . 
-
+I runned the jupyter file in kaggle.
 
