@@ -2,3 +2,6 @@ finger_crops/
 myenv/
 data/
 *.pth
+EfficientNetB1_best.pth ResNet18_best.pth ViT_Tiny_best.pth
+*.PTH
+*.pt
