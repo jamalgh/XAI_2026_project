@@ -1,2 +1,5 @@
 11k_hands_real/
 finger_crops/
+myenv/
+data/
+*.pth
